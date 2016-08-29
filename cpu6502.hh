@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.1 2016/08/28 02:01:28 urs Exp $
+// $Id: cpu6502.hh,v 1.2 2016/08/29 20:20:24 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -12,14 +12,11 @@
 class cpu_6502 {
 public:
     cpu_6502() : A(0), X(0), Y(0), S(0), PC(0), P(0) {}
-    void run(uint16_t addr) {
-	PC = addr;
-	run();
-    }
-    void run();
     void attach(memory *mem) {
 	this->mem = mem;
     }
+    void reset();
+    void run();
 
 private:
     // The CPU register set
@@ -39,6 +36,10 @@ private:
 	    uint8_t N:1;
 	};
     };
+
+    const uint16_t NMI   = 0xfffa;
+    const uint16_t RESET = 0xfffc;
+    const uint16_t IRQ   = 0xfffe;
 
     // External memory (64K)
     memory *mem;

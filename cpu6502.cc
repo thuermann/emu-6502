@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.1 2016/08/28 02:01:28 urs Exp $
+// $Id: cpu6502.cc,v 1.2 2016/08/29 20:20:24 urs Exp $
 //
 
 #include <iostream>
@@ -8,6 +8,15 @@
 
 #include "cpu6502.hh"
 #include "memory.hh"
+
+
+void cpu_6502::reset()
+{
+    uint8_t lo = mem->load(RESET);
+    uint8_t hi = mem->load(RESET + 1);
+    PC = (hi << 8) | lo;
+    run();
+}
 
 void cpu_6502::run()
 {

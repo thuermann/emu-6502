@@ -1,0 +1,12 @@
+This is a simple emulator of the 6502 8-bit CPU which was very popular
+in the 1980's.  This CPU is found in popular home computers of that
+time like the Apple II, Commodore VIC-20 and C-64, Atari XL 600/800.
+
+This emulator was a fun project to teach how CPUs work, i.e. how it
+executes the machine opcode your assembler generates from assembly
+language input.  Therefore, the aim is for the code to be very simple
+and readable.  Execution speed is only a very minor goal.  Actual 6502
+programs that do not depend on timing, interrupts, or additional
+hardware should run correctly and produce correct results.  However,
+the implementation of decimal (BCD) add and subtract instructions is
+currently missing.

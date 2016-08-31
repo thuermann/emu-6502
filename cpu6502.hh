@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.4 2016/08/31 05:34:59 urs Exp $
+// $Id: cpu6502.hh,v 1.5 2016/08/31 05:53:34 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -136,7 +136,10 @@ private:
     typedef void (cpu_6502::*instruction)(uint8_t opcode);
     static const instruction itab[256];
 
+    // Reporting CPU actions
     bool verbose;
+    uint8_t opc[3];
+    int opclen;
 };
 
 #endif

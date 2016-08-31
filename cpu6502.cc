@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.4 2016/08/31 05:34:59 urs Exp $
+// $Id: cpu6502.cc,v 1.5 2016/08/31 05:53:34 urs Exp $
 //
 
 #include <iostream>
@@ -20,14 +20,22 @@ void cpu_6502::reset()
 
 void cpu_6502::run()
 {
+    unsigned long icount = 0;
     std::cout << std::hex << std::setfill('0');
+
     while (1) {
+	opclen = 0;
 	if (verbose)
 	    std::cout << "executing " << std::setw(4) << PC << ": ";
 	uint8_t opcode = fetch();
 	(this->*itab[opcode])(opcode);
-	if (verbose)
-	    std::cout << std::setw(2) << (int)opcode << "\t["
+	if (verbose) {
+	    for (int i = 0; i < 3; i++)
+		if (i < opclen)
+		    std::cout << ' ' << std::setw(2) << (int)opc[i];
+		else
+		    std::cout << "   ";
+	    std::cout << "  ["
 		      << std::setw(2) << (int)A << ' '
 		      << std::setw(2) << (int)X << ' '
 		      << std::setw(2) << (int)Y << ' '
@@ -35,10 +43,13 @@ void cpu_6502::run()
 		      << std::setw(2) << (int)P << ' '
 		      << std::setw(4) << (int)PC << ']'
 		      << std::endl;
+	}
+	icount++;
 	// Temporary hack to provide a way to terminate a program
 	if (opcode == 0)
 	    break;
     }
+    std::cout << std::dec << icount << " instructions executed." << std::endl;
 }
 
 #define I(mnc) &cpu_6502::mnc
@@ -403,7 +414,7 @@ void cpu_6502::nop(uint8_t opcode)
 
 uint8_t cpu_6502::fetch()
 {
-    return mem->load(PC++);
+    return opc[opclen++] = mem->load(PC++);
 }
 
 void cpu_6502::push(uint8_t val)

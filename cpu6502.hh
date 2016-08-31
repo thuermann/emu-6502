@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.2 2016/08/29 20:20:24 urs Exp $
+// $Id: cpu6502.hh,v 1.3 2016/08/31 05:32:40 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -102,7 +102,16 @@ private:
     uint8_t pull();
 
     enum { INX, ZP, IMM, ABS, INY, ZPX, ABY, ABX, ZPY, IND };
-    uint16_t get_ea(uint8_t ea);
+    struct ea {
+	enum { MEM, IMM } type;
+	union {
+	    uint8_t  val;
+	    uint16_t addr;
+	};
+    };
+    struct ea get_ea(uint8_t addrmode);
+    uint8_t   load_ea(struct ea ea);
+    void      store_ea(struct ea ea, uint8_t val);
 
     // ALU functions
     void alu_adc(uint8_t val);

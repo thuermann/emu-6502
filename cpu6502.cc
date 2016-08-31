@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.2 2016/08/29 20:20:24 urs Exp $
+// $Id: cpu6502.cc,v 1.3 2016/08/31 05:32:40 urs Exp $
 //
 
 #include <iostream>
@@ -78,109 +78,109 @@ const cpu_6502::instruction cpu_6502::itab[256] = {
 
 void cpu_6502::sta(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    mem->store(get_ea(ea), A);
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    store_ea(ea, A);
 }
 
 void cpu_6502::lda(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    A = mem->load(get_ea(ea));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    A = load_ea(ea);
     set_NZ(A);
 }
 
 void cpu_6502::ora(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    alu_ora(mem->load(get_ea(ea)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    alu_ora(load_ea(ea));
 }
 
 void cpu_6502::AND(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    alu_and(mem->load(get_ea(ea)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    alu_and(load_ea(ea));
 }
 
 void cpu_6502::eor(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    alu_eor(mem->load(get_ea(ea)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    alu_eor(load_ea(ea));
 }
 
 void cpu_6502::adc(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    alu_adc(mem->load(get_ea(ea)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    alu_adc(load_ea(ea));
 }
 
 void cpu_6502::sbc(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    alu_sbc(mem->load(get_ea(ea)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    alu_sbc(load_ea(ea));
 }
 
 void cpu_6502::cmp(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    alu_cmp(A, mem->load(get_ea(ea)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    alu_cmp(A, load_ea(ea));
 }
 
 void cpu_6502::stx(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    if (ea == ABX)
-	ea = ABY;
-    else if (ea == ZPX)
-	ea = ZPY;
-    mem->store(get_ea(ea), X);
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == ABX)
+	addrmode = ABY;
+    else if (addrmode == ZPX)
+	addrmode = ZPY;
+    store_ea(get_ea(addrmode), X);
 }
 
 void cpu_6502::ldx(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    if (ea == INX)
-	ea = IMM;
-    else if (ea == ABX)
-	ea = ABY;
-    else if (ea == ZPX)
-	ea = ZPY;
-    X = mem->load(get_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == INX)
+	addrmode = IMM;
+    else if (addrmode == ABX)
+	addrmode = ABY;
+    else if (addrmode == ZPX)
+	addrmode = ZPY;
+    X = load_ea(get_ea(addrmode));
     set_NZ(X);
 }
 
 void cpu_6502::cpx(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    if (ea == INX)
-	ea = IMM;
-    else if (ea == ABX)
-	ea = ABY;
-    else if (ea == ZPX)
-	ea = ZPY;
-    alu_cmp(X, mem->load(get_ea(ea)));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == INX)
+	addrmode = IMM;
+    else if (addrmode == ABX)
+	addrmode = ABY;
+    else if (addrmode == ZPX)
+	addrmode = ZPY;
+    alu_cmp(X, load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::sty(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    mem->store(get_ea(ea), Y);
+    uint8_t addrmode = (opcode >> 2) & 7;
+    store_ea(get_ea(addrmode), Y);
 }
 
 void cpu_6502::ldy(uint8_t opcode)
 {
-    uint8_t ea = (opcode >> 2) & 7;
-    if (ea == INX)
-	ea = IMM;
-    Y = mem->load(get_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == INX)
+	addrmode = IMM;
+    Y = load_ea(get_ea(addrmode));
     set_NZ(Y);
 }
 
 void cpu_6502::cpy(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    if (ea == INX)
-	ea = IMM;
-    alu_cmp(Y, mem->load(get_ea(ea)));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == INX)
+	addrmode = IMM;
+    alu_cmp(Y, load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::pha(uint8_t opcode)
@@ -256,66 +256,64 @@ void cpu_6502::dey(uint8_t opcode)
 
 void cpu_6502::inc(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    uint16_t addr = get_ea(ea);
-    mem->store(addr, alu_inc(mem->load(addr)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    store_ea(ea, alu_inc(load_ea(ea)));
 }
 
 void cpu_6502::dec(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    uint16_t addr = get_ea(ea);
-    mem->store(addr, alu_dec(mem->load(addr)));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    store_ea(ea, alu_dec(load_ea(ea)));
 }
 
 void cpu_6502::asl(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    if (ea == IMM)
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == IMM)
 	A = alu_asl(A);
     else {
-	uint16_t addr = get_ea(ea);
-	mem->store(addr, alu_asl(mem->load(addr)));
+	struct ea ea = get_ea(addrmode);
+	store_ea(ea, alu_asl(load_ea(ea)));
     }
 }
 
 void cpu_6502::lsr(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    if (ea == IMM)
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == IMM)
 	A = alu_lsr(A);
     else {
-	uint16_t addr = get_ea(ea);
-	mem->store(addr, alu_lsr(mem->load(addr)));
+	struct ea ea = get_ea(addrmode);
+	store_ea(ea, alu_lsr(load_ea(ea)));
     }
 }
 
 void cpu_6502::rol(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    if (ea == IMM)
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == IMM)
 	A = alu_rol(A);
     else {
-	uint16_t addr = get_ea(ea);
-	mem->store(addr, alu_rol(mem->load(addr)));
+	struct ea ea = get_ea(addrmode);
+	store_ea(ea, alu_rol(load_ea(ea)));
     }
 }
 
 void cpu_6502::ror(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    if (ea == IMM)
+    uint8_t addrmode = (opcode >> 2) & 7;
+    if (addrmode == IMM)
 	A = alu_ror(A);
     else {
-	uint16_t addr = get_ea(ea);
-	mem->store(addr, alu_ror(mem->load(addr)));
+	struct ea ea = get_ea(addrmode);
+	store_ea(ea, alu_ror(load_ea(ea)));
     }
 }
 
 void cpu_6502::bit(uint8_t opcode)
 {
-    uint8_t  ea = (opcode >> 2) & 7;
-    uint8_t val = mem->load(get_ea(ea));
+    struct ea ea = get_ea((opcode >> 2) & 7);
+    uint8_t val = load_ea(ea);
     P = P & ~0xc0 | val & 0xc0;
     Z = (A & val) == 0;
 }
@@ -355,18 +353,16 @@ void cpu_6502::bCC(uint8_t opcode)
 
 void cpu_6502::jmp(uint8_t opcode)
 {
-    if (opcode == 0x4c)
-	PC = get_ea(ABS);
-    else
-	PC = get_ea(IND);
+    struct ea ea = opcode == 0x4c ? get_ea(ABS) : get_ea(IND);
+    PC = ea.addr;
 }
 
 void cpu_6502::jsr(uint8_t opcode)
 {
-    uint16_t dst = get_ea(ABS);
+    struct ea ea = get_ea(ABS);
     push(PC - 1 >> 8);
     push(PC - 1 & 0xff);
-    PC = dst;
+    PC = ea.addr;
 }
 
 void cpu_6502::rts(uint8_t opcode)
@@ -418,12 +414,17 @@ uint8_t cpu_6502::pull()
     return mem->load(0x100 + ++S);
 }
 
-uint16_t cpu_6502::get_ea(uint8_t ea)
+struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
 {
+    struct ea ea;
     uint8_t  lo, hi;
     uint16_t addr;
 
-    switch (ea) {
+    switch (addrmode) {
+    case IMM:
+	ea.type = ea::IMM;
+	ea.val  = fetch();
+	return ea;
     case ABS:
 	lo = fetch();
 	hi = fetch();
@@ -479,14 +480,31 @@ uint16_t cpu_6502::get_ea(uint8_t ea)
 	hi = mem->load(addr + 1);
 	addr = ((hi << 8) | lo) + Y;
 	break;
-    case IMM:
-	addr = PC++;
-	break;
+    default:
+	// unreachable, but prevent compiler warning
+	addr = 0;
+    }
+    ea.type = ea::MEM;
+    ea.addr = addr;
+    return ea;
+}
+
+uint8_t cpu_6502::load_ea(struct ea ea)
+{
+    switch (ea.type) {
+    case ea::IMM:
+	return ea.val;
+    case ea::MEM:
+	return mem->load(ea.addr);
     default:
 	// unreachable
 	return 0;
-    }
-    return addr;
+    };
+}
+
+void cpu_6502::store_ea(struct ea ea, uint8_t val)
+{
+    mem->store(ea.addr, val);
 }
 
 // ALU operations

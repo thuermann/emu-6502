@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.3 2016/08/31 05:32:40 urs Exp $
+// $Id: cpu6502.hh,v 1.4 2016/08/31 05:34:59 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -11,12 +11,15 @@
 
 class cpu_6502 {
 public:
-    cpu_6502() : A(0), X(0), Y(0), S(0), PC(0), P(0) {}
+    cpu_6502() : A(0), X(0), Y(0), S(0), PC(0), P(0),
+		 verbose(false) {}
     void attach(memory *mem) {
 	this->mem = mem;
     }
     void reset();
     void run();
+
+    void set_verbose(bool v) { verbose = v; }
 
 private:
     // The CPU register set
@@ -132,6 +135,8 @@ private:
     // The instruction decoder table
     typedef void (cpu_6502::*instruction)(uint8_t opcode);
     static const instruction itab[256];
+
+    bool verbose;
 };
 
 #endif

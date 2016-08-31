@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.3 2016/08/31 05:32:40 urs Exp $
+// $Id: cpu6502.cc,v 1.4 2016/08/31 05:34:59 urs Exp $
 //
 
 #include <iostream>
@@ -22,17 +22,19 @@ void cpu_6502::run()
 {
     std::cout << std::hex << std::setfill('0');
     while (1) {
-	std::cout << "executing " << std::setw(4) << PC << ": ";
+	if (verbose)
+	    std::cout << "executing " << std::setw(4) << PC << ": ";
 	uint8_t opcode = fetch();
 	(this->*itab[opcode])(opcode);
-	std::cout << std::setw(2) << (int)opcode << "\t["
-		  << std::setw(2) << (int)A << ' '
-		  << std::setw(2) << (int)X << ' '
-		  << std::setw(2) << (int)Y << ' '
-		  << std::setw(2) << (int)S << ' '
-		  << std::setw(2) << (int)P << ' '
-		  << std::setw(4) << (int)PC << ']'
-		  << std::endl;
+	if (verbose)
+	    std::cout << std::setw(2) << (int)opcode << "\t["
+		      << std::setw(2) << (int)A << ' '
+		      << std::setw(2) << (int)X << ' '
+		      << std::setw(2) << (int)Y << ' '
+		      << std::setw(2) << (int)S << ' '
+		      << std::setw(2) << (int)P << ' '
+		      << std::setw(4) << (int)PC << ']'
+		      << std::endl;
 	// Temporary hack to provide a way to terminate a program
 	if (opcode == 0)
 	    break;

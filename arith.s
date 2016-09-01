@@ -1,5 +1,5 @@
 ;
-; "$Id: arith.s,v 1.2 2016/09/01 07:30:18 urs Exp $"
+; "$Id: arith.s,v 1.3 2016/09/01 07:30:28 urs Exp $"
 ;
 
 	* = $4000
@@ -9,21 +9,28 @@ src2	= $22
 dst	= $24
 cnt	= $26
 
+sum	= $400
+diff	= $410
+left	= $420
+right	= $430
+prod	= $440
+pow	= $450
+
 entry	jmp start
 	nop
 
 s1	.byte $4e, $61, $bc, $00,0,0,0,0,0,0,0,0,0,0,0,0
 s2	.byte $b1, $7f, $39, $05,0,0,0,0,0,0,0,0,0,0,0,0
-d	.byte 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
-base	.byte 3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-pow	.byte 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+base	.byte $67,$45,$23,$01,$98,$ba,$dc,$fe,0,0,0,0,0,0,0,0
+one	.byte 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
 start	ldx #$ff
 	txs
 
 	lda #16
 	sta cnt
+
 	lda #<s1
 	sta src1
 	lda #>s1
@@ -32,9 +39,45 @@ start	ldx #$ff
 	sta src2
 	lda #>s2
 	sta src2+1
-	lda #<d
+
+	lda #<sum
 	sta dst
-	lda #>d
+	lda #>sum
+	sta dst+1
+	jsr adcx
+
+	lda #<diff
+	sta dst
+	lda #>diff
+	sta dst+1
+	jsr sbcx
+
+	lda #<left
+	sta dst
+	lda #>left
+	sta dst+1
+	lda #4
+l1	pha
+	clc
+	jsr rolx
+	pla
+	sec
+	sbc #1
+	bne l1
+
+	lda #<right
+	sta dst
+	lda #>right
+	sta dst+1
+	ldx #4
+r1	clc
+	jsr rorx
+	dex
+	bne r1
+
+	lda #<prod
+	sta dst
+	lda #>prod
 	sta dst+1
 	jsr mulx
 
@@ -42,6 +85,17 @@ start	ldx #$ff
 	sta dst
 	lda #>pow
 	sta dst+1
+	lda #<base
+	sta src1
+	lda #>base
+	sta src1+1
+
+	ldy cnt
+	dey
+c1	lda one,y
+	sta (dst),y
+	dey
+	bpl c1
 
 	ldx #80
 lp1	txa
@@ -49,9 +103,7 @@ lp1	txa
 
 	ldy cnt
 	dey
-lp2	lda base,y
-	sta (src1),y
-	lda (dst),y
+lp2	lda (dst),y
 	sta (src2),y
 	dey
 	bpl lp2

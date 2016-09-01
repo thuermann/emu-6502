@@ -1,5 +1,5 @@
 ;
-; "$Id: arith.s,v 1.1 2016/08/31 06:06:05 urs Exp $"
+; "$Id: arith.s,v 1.2 2016/09/01 07:30:18 urs Exp $"
 ;
 
 	* = $4000
@@ -65,7 +65,7 @@ lp2	lda base,y
 
 	brk
 
-copyx	ldy #cnt
+copyx	ldy cnt
 	dey
 copyx1	lda (src1),y
 	sta (dst),y

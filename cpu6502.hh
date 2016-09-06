@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.5 2016/08/31 05:53:34 urs Exp $
+// $Id: cpu6502.hh,v 1.6 2016/09/06 21:07:49 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -14,7 +14,7 @@ public:
     cpu_6502() : A(0), X(0), Y(0), S(0), PC(0), P(0),
 		 verbose(false) {}
     void attach(memory *mem) {
-	this->mem = mem;
+	this->mem.attach(mem);
     }
     void reset();
     void run();
@@ -45,7 +45,14 @@ private:
     const uint16_t IRQ   = 0xfffe;
 
     // External memory (64K)
-    memory *mem;
+    class mem_interface {
+    public:
+	void attach(memory *mem)                  { this->mem = mem; }
+	uint8_t load(uint16_t addr)               { return mem->load(addr); }
+	void    store(uint16_t addr, uint8_t val) { mem->store(addr, val); }
+    private:
+	memory *mem;
+    } mem;
 
     // CPU instructions
     void sta(uint8_t opcode);

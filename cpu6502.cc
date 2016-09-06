@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.6 2016/09/06 21:07:39 urs Exp $
+// $Id: cpu6502.cc,v 1.7 2016/09/06 21:07:49 urs Exp $
 //
 
 #include <iostream>
@@ -7,13 +7,11 @@
 #include <cstdint>
 
 #include "cpu6502.hh"
-#include "memory.hh"
-
 
 void cpu_6502::reset()
 {
-    uint8_t lo = mem->load(RESET);
-    uint8_t hi = mem->load(RESET + 1);
+    uint8_t lo = mem.load(RESET);
+    uint8_t hi = mem.load(RESET + 1);
     PC = (hi << 8) | lo;
     run();
 }
@@ -392,8 +390,8 @@ void cpu_6502::brk(uint8_t opcode)
     push(PC & 0xff);
     push(P);
     I = 1;
-    uint8_t lo = mem->load(IRQ);
-    uint8_t hi = mem->load(IRQ + 1);
+    uint8_t lo = mem.load(IRQ);
+    uint8_t hi = mem.load(IRQ + 1);
     PC = (hi << 8) | lo;
 }
 
@@ -414,17 +412,17 @@ void cpu_6502::nop(uint8_t opcode)
 
 uint8_t cpu_6502::fetch()
 {
-    return opc[opclen++] = mem->load(PC++);
+    return opc[opclen++] = mem.load(PC++);
 }
 
 void cpu_6502::push(uint8_t val)
 {
-    mem->store(0x100 + S--, val);
+    mem.store(0x100 + S--, val);
 }
 
 uint8_t cpu_6502::pull()
 {
-    return mem->load(0x100 + ++S);
+    return mem.load(0x100 + ++S);
 }
 
 struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
@@ -474,23 +472,23 @@ struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
 	lo = fetch();
 	hi = fetch();
 	addr = (hi << 8) | lo;
-	lo = mem->load(addr);
+	lo = mem.load(addr);
 	// This is a bug in the 6502.
 	addr = addr & 0xff00 | (addr + 1 & 0xff);
-	hi = mem->load(addr);
+	hi = mem.load(addr);
 	addr = (hi << 8) | lo;
 	break;
     case INX:
 	addr = fetch();
 	addr += X;
-	lo = mem->load(addr++);
-	hi = mem->load(addr);
+	lo = mem.load(addr++);
+	hi = mem.load(addr);
 	addr = (hi << 8) | lo;
 	break;
     case INY:
 	addr = fetch();
-	lo = mem->load(addr);
-	hi = mem->load(addr + 1);
+	lo = mem.load(addr++);
+	hi = mem.load(addr);
 	addr = ((hi << 8) | lo) + Y;
 	break;
     default:
@@ -508,7 +506,7 @@ uint8_t cpu_6502::load_ea(struct ea ea)
     case ea::IMM:
 	return ea.val;
     case ea::MEM:
-	return mem->load(ea.addr);
+	return mem.load(ea.addr);
     default:
 	// unreachable
 	return 0;
@@ -517,7 +515,7 @@ uint8_t cpu_6502::load_ea(struct ea ea)
 
 void cpu_6502::store_ea(struct ea ea, uint8_t val)
 {
-    mem->store(ea.addr, val);
+    mem.store(ea.addr, val);
 }
 
 // ALU operations

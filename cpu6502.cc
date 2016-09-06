@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.5 2016/08/31 05:53:34 urs Exp $
+// $Id: cpu6502.cc,v 1.6 2016/09/06 21:07:39 urs Exp $
 //
 
 #include <iostream>
@@ -392,8 +392,8 @@ void cpu_6502::brk(uint8_t opcode)
     push(PC & 0xff);
     push(P);
     I = 1;
-    uint8_t lo = mem->load(0xfffe);
-    uint8_t hi = mem->load(0xffff);
+    uint8_t lo = mem->load(IRQ);
+    uint8_t hi = mem->load(IRQ + 1);
     PC = (hi << 8) | lo;
 }
 

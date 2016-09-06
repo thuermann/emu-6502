@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.7 2016/09/06 21:07:49 urs Exp $
+// $Id: cpu6502.cc,v 1.8 2016/09/06 21:09:09 urs Exp $
 //
 
 #include <iostream>
@@ -26,7 +26,8 @@ void cpu_6502::run()
 	if (verbose)
 	    std::cout << "executing " << std::setw(4) << PC << ": ";
 	uint8_t opcode = fetch();
-	(this->*itab[opcode])(opcode);
+	if (instruction ins = itab[opcode])
+	    (this->*ins)(opcode);
 	if (verbose) {
 	    for (int i = 0; i < 3; i++)
 		if (i < opclen)

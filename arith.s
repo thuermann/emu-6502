@@ -1,5 +1,5 @@
 ;
-; "$Id: arith.s,v 1.3 2016/09/01 07:30:28 urs Exp $"
+; "$Id: arith.s,v 1.4 2016/09/07 22:54:54 urs Exp $"
 ;
 
 	* = $4000
@@ -31,7 +31,7 @@ start	ldx #$ff
 	lda #16
 	sta cnt
 
-	lda #<s1
+	lda #<s1	; src1 = &s1, src2 = &s2
 	sta src1
 	lda #>s1
 	sta src1+1
@@ -40,19 +40,22 @@ start	ldx #$ff
 	lda #>s2
 	sta src2+1
 
-	lda #<sum
+; calculate s1 + s2
+	lda #<sum	; dst = &sum, *dst = *src1 + *src2
 	sta dst
 	lda #>sum
 	sta dst+1
 	jsr adcx
 
-	lda #<diff
+; calculate s1 - s2
+	lda #<diff	; dst = &diff, *dst = *src1 - *src2
 	sta dst
 	lda #>diff
 	sta dst+1
 	jsr sbcx
 
-	lda #<left
+; calculate s1 << 4
+	lda #<left	; dst = &left, *dst = *src1 << 4
 	sta dst
 	lda #>left
 	sta dst+1
@@ -65,7 +68,8 @@ l1	pha
 	sbc #1
 	bne l1
 
-	lda #<right
+; calculate s1 >> 4
+	lda #<right	; dst = &right, *dst = *src1 >> 4
 	sta dst
 	lda #>right
 	sta dst+1
@@ -75,13 +79,15 @@ r1	clc
 	dex
 	bne r1
 
-	lda #<prod
+; calculate s1 * s2
+	lda #<prod	; dst = &prod, *dst = *src1 * *src2
 	sta dst
 	lda #>prod
 	sta dst+1
 	jsr mulx
 
-	lda #<pow
+;  calculate base ^ 80
+	lda #<pow	; dst = &pow, src1 = &base
 	sta dst
 	lda #>pow
 	sta dst+1
@@ -90,7 +96,7 @@ r1	clc
 	lda #>base
 	sta src1+1
 
-	ldy cnt
+	ldy cnt		; *dst = 1
 	dey
 c1	lda one,y
 	sta (dst),y
@@ -101,14 +107,14 @@ c1	lda one,y
 lp1	txa
 	pha
 
-	ldy cnt
+	ldy cnt		; *src2 = *dst
 	dey
 lp2	lda (dst),y
 	sta (src2),y
 	dey
 	bpl lp2
 
-	jsr mulx
+	jsr mulx	; *dst = *src1 * *src2
 
 	pla
 	tax
@@ -116,6 +122,8 @@ lp2	lda (dst),y
 	bne lp1
 
 	brk
+
+; copy *src1 to *dst
 
 copyx	ldy cnt
 	dey
@@ -125,6 +133,9 @@ copyx1	lda (src1),y
 	bpl copyx1
 	rts
 
+; rotate right
+; *dst = (*src1 >> 1) | carry << (NUMBITS - 1), carry = *src1 & 1
+
 rorx	ldy cnt
 	dey
 rorx1	lda (src1),y
@@ -133,6 +144,9 @@ rorx1	lda (src1),y
 	dey
 	bpl rorx1
 	rts
+
+; rotate left
+; *dst = (*src1 << 1) | carry, carry = *src1 & (1 << NUMBITS-1)
 
 rolx	ldy #0
 	ldx cnt
@@ -144,6 +158,9 @@ rolx1	lda (src1),y
 	bne rolx1
 	rts
 
+; add
+; *dst = *src1 + *src2
+
 adcx	ldy #0
 	ldx cnt
 adcx1	lda (src1),y
@@ -153,6 +170,9 @@ adcx1	lda (src1),y
 	dex
 	bne adcx1
 	rts
+
+; subtract
+; *dst = *src1 - *src2
 
 sbcx	ldy #0
 	ldx cnt
@@ -164,7 +184,10 @@ sbcx1	lda (src1),y
 	bne sbcx1
 	rts
 
-mulx	ldy cnt
+; multiply
+; *dst = *src1 * *src2
+
+mulx	ldy cnt		; *dst = 0
 	dey
 	lda #0
 mulx0	sta (dst),y
@@ -177,7 +200,7 @@ mulx0	sta (dst),y
 	asl
 mulx1	pha
 
-	ldy cnt		; lsrx src1
+	ldy cnt		; *src1 >>= 1
 	dey
 mulxsr	lda (src1),y
 	ror
@@ -187,7 +210,7 @@ mulxsr	lda (src1),y
 
 	bcc mulx2
 
-	ldy #0		; dst += src2
+	ldy #0		; *dst += *src2
 	ldx cnt
 	clc
 mulxadd	lda (src2),y
@@ -197,7 +220,7 @@ mulxadd	lda (src2),y
 	dex
 	bne mulxadd
 
-mulx2	ldy #0		; shift src2
+mulx2	ldy #0		; *src2 <<= 1
 	ldx cnt
 	clc
 mulxsl	lda (src2),y

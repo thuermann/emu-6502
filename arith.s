@@ -1,5 +1,5 @@
 ;
-; "$Id: arith.s,v 1.4 2016/09/07 22:54:54 urs Exp $"
+; "$Id: arith.s,v 1.5 2016/09/07 22:55:04 urs Exp $"
 ;
 
 	* = $4000
@@ -15,6 +15,7 @@ left	= $420
 right	= $430
 prod	= $440
 pow	= $450
+tmp	= $460
 
 entry	jmp start
 	nop
@@ -95,6 +96,10 @@ r1	clc
 	sta src1
 	lda #>base
 	sta src1+1
+	lda #<tmp
+	sta src2
+	lda #>tmp
+	sta src2+1
 
 	ldy cnt		; *dst = 1
 	dey
@@ -200,14 +205,31 @@ mulx0	sta (dst),y
 	asl
 mulx1	pha
 
-	ldy cnt		; *src1 >>= 1
+	ldy cnt		; *src1 <<= 1
 	dey
+	lda (src1),y
+	asl
+	php
+	ldy #0
+	ldx cnt
 mulxsr	lda (src1),y
-	ror
+	rol
 	sta (src1),y
-	dey
-	bpl mulxsr
+	iny
+	dex
+	bne mulxsr
 
+	ldy #0		; *dst <<= 1
+	ldx cnt
+	clc
+mulxsl	lda (dst),y
+	rol
+	sta (dst),y
+	iny
+	dex
+	bne mulxsl
+
+	plp
 	bcc mulx2
 
 	ldy #0		; *dst += *src2
@@ -220,17 +242,7 @@ mulxadd	lda (src2),y
 	dex
 	bne mulxadd
 
-mulx2	ldy #0		; *src2 <<= 1
-	ldx cnt
-	clc
-mulxsl	lda (src2),y
-	rol
-	sta (src2),y
-	iny
-	dex
-	bne mulxsl
-
-	pla
+mulx2	pla
 	sec
 	sbc #1
 	bne mulx1

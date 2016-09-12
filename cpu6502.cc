@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.8 2016/09/06 21:09:09 urs Exp $
+// $Id: cpu6502.cc,v 1.9 2016/09/12 20:43:00 urs Exp $
 //
 
 #include <iostream>
@@ -389,7 +389,7 @@ void cpu_6502::brk(uint8_t opcode)
 {
     push(PC >> 8);
     push(PC & 0xff);
-    push(P);
+    push(P | 0x20);
     I = 1;
     uint8_t lo = mem.load(IRQ);
     uint8_t hi = mem.load(IRQ + 1);
@@ -398,7 +398,7 @@ void cpu_6502::brk(uint8_t opcode)
 
 void cpu_6502::rti(uint8_t opcode)
 {
-    P = pull();
+    P = pull() & ~0x30;
     uint8_t lo = pull();
     uint8_t hi = pull();
     PC = (hi << 8) | lo;

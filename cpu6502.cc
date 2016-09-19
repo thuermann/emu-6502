@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.9 2016/09/12 20:43:00 urs Exp $
+// $Id: cpu6502.cc,v 1.10 2016/09/19 22:58:33 urs Exp $
 //
 
 #include <iostream>
@@ -344,7 +344,7 @@ void cpu_6502::clF(uint8_t opcode)
 void cpu_6502::seF(uint8_t opcode)
 {
     // The bit number in register P to be set.
-    static const char bittab[] = { 0, -1, 6, 3 };
+    static const char bittab[] = { 0, 2, -1, 3 };
 
     P |= 1 << bittab[opcode >> 6];
 }

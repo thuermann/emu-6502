@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.10 2016/09/19 22:58:33 urs Exp $
+// $Id: cpu6502.cc,v 1.11 2016/09/19 23:00:17 urs Exp $
 //
 
 #include <iostream>
@@ -327,16 +327,16 @@ void cpu_6502::bit(uint8_t opcode)
     struct ea ea = get_ea((opcode >> 2) & 7);
     uint8_t val = load_ea(ea);
     P = P & ~0xc0 | val & 0xc0;
-    Z = (A & val) == 0;
+    set(Z, (A & val) == 0);
 }
 
 // Instructions clc, cli, clv, cld.
 void cpu_6502::clF(uint8_t opcode)
 {
     // The bit number in register P to be cleared.
-    static const char bittab[] = { 0, 2, 6, 3 };
+    static const char bittab[] = { C, I, V, D };
 
-    P &= ~(1 << bittab[opcode >> 6]);
+    set(bittab[opcode >> 6], 0);
 }
 
 // Instructions sec, sei, sed.
@@ -344,21 +344,21 @@ void cpu_6502::clF(uint8_t opcode)
 void cpu_6502::seF(uint8_t opcode)
 {
     // The bit number in register P to be set.
-    static const char bittab[] = { 0, 2, -1, 3 };
+    static const char bittab[] = { C, I, -1, D };
 
-    P |= 1 << bittab[opcode >> 6];
+    set(bittab[opcode >> 6], 1);
 }
 
 // Instructions bpl, bmi, bvc, bvs, bcc, bcs, bne, beq.
 void cpu_6502::bCC(uint8_t opcode)
 {
     // The bit number in register P to be tested.
-    static const char bittab[] = { 7, 6, 0, 1 };
+    static const char bittab[] = { N, V, C, Z };
 
     int8_t offset = fetch();
     bool jmp;
 
-    jmp = !!(P & (1 << bittab[opcode >> 6])) ^ !(opcode & 0x20);
+    jmp = get(bittab[opcode >> 6]) ^ !(opcode & 0x20);
     if (jmp)
 	PC += offset;
 }
@@ -390,7 +390,7 @@ void cpu_6502::brk(uint8_t opcode)
     push(PC >> 8);
     push(PC & 0xff);
     push(P | 0x20);
-    I = 1;
+    set(I, 1);
     uint8_t lo = mem.load(IRQ);
     uint8_t hi = mem.load(IRQ + 1);
     PC = (hi << 8) | lo;
@@ -523,19 +523,19 @@ void cpu_6502::store_ea(struct ea ea, uint8_t val)
 
 void cpu_6502::alu_adc(uint8_t val)
 {
-    if (D) {
+    if (get(D)) {
 	// not yet implemented
     } else {
-	uint16_t res = A + val + C;
-	C = (res & 0x100) != 0;
-	V = ((res ^ A) & (res ^ val) & 0x80) != 0;
+	uint16_t res = A + val + get(C);
+	set(C, res & 0x100);
+	set(V, (res ^ A) & (res ^ val) & 0x80);
 	set_NZ(A = res);
     }
 }
 
 void cpu_6502::alu_sbc(uint8_t val)
 {
-    if (D) {
+    if (get(D)) {
 	// not yet implemented
     } else
 	alu_adc(~val);
@@ -560,13 +560,13 @@ void cpu_6502::alu_cmp(uint8_t val1, uint8_t val2)
 {
     uint16_t res = val1 + (val2 ^ 0xff) + 1;
     // The cmp, cpx, and cpy instructions don't affect the V flag.
-    C = (res & 0x100) != 0;
+    set(C, res & 0x100);
     set_NZ(res);
 }
 
 uint8_t cpu_6502::alu_asl(uint8_t val)
 {
-    C = (val & 0x80) != 0;
+    set(C, val & 0x80);
     val <<= 1;
     set_NZ(val);
     return val;
@@ -574,7 +574,7 @@ uint8_t cpu_6502::alu_asl(uint8_t val)
 
 uint8_t cpu_6502::alu_lsr(uint8_t val)
 {
-    C = (val & 1) != 0;
+    set(C, val & 1);
     val >>= 1;
     set_NZ(val);
     return val;
@@ -582,21 +582,21 @@ uint8_t cpu_6502::alu_lsr(uint8_t val)
 
 uint8_t cpu_6502::alu_rol(uint8_t val)
 {
-    uint8_t cout = (val & 0x80) != 0;
+    bool cout = val & 0x80;
     val <<= 1;
-    val |= (C != 0);
+    val |= get(C);
     set_NZ(val);
-    C = cout;
+    set(C, cout);
     return val;
 }
 
 uint8_t cpu_6502::alu_ror(uint8_t val)
 {
-    uint8_t cout = (val & 1) != 0;
+    bool cout = val & 1;
     val >>= 1;
-    val |= C ? 0x80 : 0;
+    val |= get(C) ? 0x80 : 0;
     set_NZ(val);
-    C = cout;
+    set(C, cout);
     return val;
 }
 
@@ -614,6 +614,6 @@ uint8_t cpu_6502::alu_dec(uint8_t val)
 
 void cpu_6502::set_NZ(uint8_t val)
 {
-    N = (val & 0x80) != 0;
-    Z = (val == 0);
+    set(N, val & 0x80);
+    set(Z, val == 0);
 }

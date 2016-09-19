@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.6 2016/09/06 21:07:49 urs Exp $
+// $Id: cpu6502.hh,v 1.7 2016/09/19 23:00:17 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -11,7 +11,7 @@
 
 class cpu_6502 {
 public:
-    cpu_6502() : A(0), X(0), Y(0), S(0), PC(0), P(0),
+    cpu_6502() : A(0), X(0), Y(0), S(0), P(0), PC(0),
 		 verbose(false) {}
     void attach(memory *mem) {
 	this->mem.attach(mem);
@@ -23,22 +23,18 @@ public:
 
 private:
     // The CPU register set
-    uint8_t  A, X, Y, S;
+    uint8_t  A, X, Y, S, P;
     uint16_t PC;
-    union {
-	uint8_t P;
-	// To be fixed: Non-portable:
-	// Depends on bit-field layout chosen by compiler
-	struct {
-	    uint8_t C:1;
-	    uint8_t Z:1;
-	    uint8_t I:1;
-	    uint8_t D:1;
-	    uint8_t unused:2;
-	    uint8_t V:1;
-	    uint8_t N:1;
-	};
-    };
+    enum { C, Z, I, D, U1, U2, V, N };
+    void set(int bit, bool b) {
+	if (b)
+	    P |= 1 << bit;
+	else
+	    P &= ~(1 << bit);
+    }
+    bool get(int bit) {
+	return P & (1 << bit);
+    }
 
     const uint16_t NMI   = 0xfffa;
     const uint16_t RESET = 0xfffc;

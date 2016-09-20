@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.11 2016/09/19 23:00:17 urs Exp $
+// $Id: cpu6502.cc,v 1.12 2016/09/20 06:17:25 urs Exp $
 //
 
 #include <iostream>
@@ -56,36 +56,36 @@ void cpu_6502::run()
 const cpu_6502::instruction cpu_6502::itab[256] = {
     I(brk), I(ora),      0, 0,      0, I(ora), I(asl), 0,  // 00
     I(php), I(ora), I(asl), 0,      0, I(ora), I(asl), 0,  // 08
-    I(bCC), I(ora),      0, 0,      0, I(ora), I(asl), 0,  // 10
-    I(clF), I(ora),      0, 0,      0, I(ora), I(asl), 0,  // 18
+    I(bpl), I(ora),      0, 0,      0, I(ora), I(asl), 0,  // 10
+    I(clc), I(ora),      0, 0,      0, I(ora), I(asl), 0,  // 18
     I(jsr), I(AND),      0, 0, I(bit), I(AND), I(rol), 0,  // 20
     I(plp), I(AND), I(rol), 0, I(bit), I(AND), I(rol), 0,  // 28
-    I(bCC), I(AND),      0, 0,      0, I(AND), I(rol), 0,  // 30
-    I(seF), I(AND),      0, 0,      0, I(AND), I(rol), 0,  // 38
+    I(bmi), I(AND),      0, 0,      0, I(AND), I(rol), 0,  // 30
+    I(sec), I(AND),      0, 0,      0, I(AND), I(rol), 0,  // 38
          0, I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 40
     I(pha), I(eor), I(lsr), 0, I(jmp), I(eor), I(lsr), 0,  // 48
-    I(bCC), I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 50
-    I(clF), I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 58
+    I(bvc), I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 50
+    I(cli), I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 58
     I(rts), I(adc),      0, 0,      0, I(adc), I(ror), 0,  // 60
     I(pla), I(adc), I(ror), 0, I(jmp), I(adc), I(ror), 0,  // 68
-    I(bCC), I(adc),      0, 0,      0, I(adc), I(ror), 0,  // 70
-    I(seF), I(adc),      0, 0,      0, I(adc), I(ror), 0,  // 78
+    I(bvs), I(adc),      0, 0,      0, I(adc), I(ror), 0,  // 70
+    I(sei), I(adc),      0, 0,      0, I(adc), I(ror), 0,  // 78
          0, I(sta),      0, 0, I(sty), I(sta), I(stx), 0,  // 80
     I(dey), I(sta), I(txa), 0, I(sty), I(sta), I(stx), 0,  // 88
-    I(bCC), I(sta),      0, 0, I(sty), I(sta), I(stx), 0,  // 90
+    I(bcc), I(sta),      0, 0, I(sty), I(sta), I(stx), 0,  // 90
     I(tya), I(sta), I(txs), 0,      0, I(sta),      0, 0,  // 98
     I(ldy), I(lda), I(ldx), 0, I(ldy), I(lda), I(ldx), 0,  // A0
     I(tay), I(lda), I(tax), 0, I(ldy), I(lda), I(ldx), 0,  // A8
-    I(bCC), I(lda),      0, 0, I(ldy), I(lda), I(ldx), 0,  // B0
-    I(clF), I(lda), I(tsx), 0, I(ldy), I(lda), I(ldx), 0,  // B8
+    I(bcs), I(lda),      0, 0, I(ldy), I(lda), I(ldx), 0,  // B0
+    I(clv), I(lda), I(tsx), 0, I(ldy), I(lda), I(ldx), 0,  // B8
     I(cpy), I(cmp),      0, 0, I(cpy), I(cmp), I(dec), 0,  // C0
     I(iny), I(cmp), I(dex), 0, I(cpy), I(cmp), I(dec), 0,  // C8
-    I(bCC), I(cmp),      0, 0,      0, I(cmp), I(dec), 0,  // D0
-    I(clF), I(cmp),      0, 0,      0, I(cmp), I(dec), 0,  // D8
+    I(bne), I(cmp),      0, 0,      0, I(cmp), I(dec), 0,  // D0
+    I(cld), I(cmp),      0, 0,      0, I(cmp), I(dec), 0,  // D8
     I(cpx), I(sbc),      0, 0, I(cpx), I(sbc), I(inc), 0,  // E0
     I(inx), I(sbc), I(nop), 0, I(cpx), I(sbc), I(inc), 0,  // E8
-    I(bCC), I(sbc),      0, 0,      0, I(sbc), I(inc), 0,  // F0
-    I(seF), I(sbc),      0, 0,      0, I(sbc), I(inc), 0,  // F8
+    I(beq), I(sbc),      0, 0,      0, I(sbc), I(inc), 0,  // F0
+    I(sed), I(sbc),      0, 0,      0, I(sbc), I(inc), 0,  // F8
 };
 
 void cpu_6502::sta(uint8_t opcode)
@@ -330,36 +330,94 @@ void cpu_6502::bit(uint8_t opcode)
     set(Z, (A & val) == 0);
 }
 
-// Instructions clc, cli, clv, cld.
-void cpu_6502::clF(uint8_t opcode)
+void cpu_6502::clc(uint8_t opcode)
 {
-    // The bit number in register P to be cleared.
-    static const char bittab[] = { C, I, V, D };
-
-    set(bittab[opcode >> 6], 0);
+    set(C, 0);
 }
 
-// Instructions sec, sei, sed.
-// The is no sev instruction, since tya is in its place.
-void cpu_6502::seF(uint8_t opcode)
+void cpu_6502::cli(uint8_t opcode)
 {
-    // The bit number in register P to be set.
-    static const char bittab[] = { C, I, -1, D };
-
-    set(bittab[opcode >> 6], 1);
+    set(I, 0);
 }
 
-// Instructions bpl, bmi, bvc, bvs, bcc, bcs, bne, beq.
-void cpu_6502::bCC(uint8_t opcode)
+void cpu_6502::clv(uint8_t opcode)
 {
-    // The bit number in register P to be tested.
-    static const char bittab[] = { N, V, C, Z };
+    set(V, 0);
+}
 
+void cpu_6502::cld(uint8_t opcode)
+{
+    set(D, 0);
+}
+
+void cpu_6502::sec(uint8_t opcode)
+{
+    set(C, 1);
+}
+
+void cpu_6502::sei(uint8_t opcode)
+{
+    set(I, 1);
+}
+
+void cpu_6502::sed(uint8_t opcode)
+{
+    set(D, 1);
+}
+
+void cpu_6502::bpl(uint8_t opcode)
+{
     int8_t offset = fetch();
-    bool jmp;
+    if (!get(N))
+	PC += offset;
+}
 
-    jmp = get(bittab[opcode >> 6]) ^ !(opcode & 0x20);
-    if (jmp)
+void cpu_6502::bmi(uint8_t opcode)
+{
+    int8_t offset = fetch();
+    if (get(N))
+	PC += offset;
+}
+
+void cpu_6502::bvc(uint8_t opcode)
+{
+    int8_t offset = fetch();
+    if (!get(V))
+	PC += offset;
+}
+
+void cpu_6502::bvs(uint8_t opcode)
+{
+    int8_t offset = fetch();
+    if (get(V))
+	PC += offset;
+}
+
+void cpu_6502::bcc(uint8_t opcode)
+{
+    int8_t offset = fetch();
+    if (!get(C))
+	PC += offset;
+}
+
+void cpu_6502::bcs(uint8_t opcode)
+{
+    int8_t offset = fetch();
+    if (get(C))
+	PC += offset;
+}
+
+void cpu_6502::bne(uint8_t opcode)
+{
+    int8_t offset = fetch();
+    if (!get(Z))
+	PC += offset;
+}
+
+void cpu_6502::beq(uint8_t opcode)
+{
+    int8_t offset = fetch();
+    if (get(Z))
 	PC += offset;
 }
 

@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.7 2016/09/19 23:00:17 urs Exp $
+// $Id: cpu6502.hh,v 1.8 2016/09/20 06:17:25 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -91,9 +91,21 @@ private:
     void ror(uint8_t opcode);
 
     void bit(uint8_t opcode);
-    void clF(uint8_t opcode);
-    void seF(uint8_t opcode);
-    void bCC(uint8_t opcode);
+    void clc(uint8_t opcode);
+    void cli(uint8_t opcode);
+    void clv(uint8_t opcode);
+    void cld(uint8_t opcode);
+    void sec(uint8_t opcode);
+    void sei(uint8_t opcode);
+    void sed(uint8_t opcode);
+    void bpl(uint8_t opcode);
+    void bmi(uint8_t opcode);
+    void bvc(uint8_t opcode);
+    void bvs(uint8_t opcode);
+    void bcc(uint8_t opcode);
+    void bcs(uint8_t opcode);
+    void bne(uint8_t opcode);
+    void beq(uint8_t opcode);
     void jmp(uint8_t opcode);
     void jsr(uint8_t opcode);
     void rts(uint8_t opcode);

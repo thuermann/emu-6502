@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.13 2016/09/22 19:56:03 urs Exp $
+// $Id: cpu6502.cc,v 1.14 2016/09/22 20:11:43 urs Exp $
 //
 
 #include <cstdint>
@@ -54,7 +54,7 @@ const cpu_6502::instruction cpu_6502::itab[256] = {
     I(plp), I(AND), I(rol), 0, I(bit), I(AND), I(rol), 0,  // 28
     I(bmi), I(AND),      0, 0,      0, I(AND), I(rol), 0,  // 30
     I(sec), I(AND),      0, 0,      0, I(AND), I(rol), 0,  // 38
-         0, I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 40
+    I(rti), I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 40
     I(pha), I(eor), I(lsr), 0, I(jmp), I(eor), I(lsr), 0,  // 48
     I(bvc), I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 50
     I(cli), I(eor),      0, 0,      0, I(eor), I(lsr), 0,  // 58

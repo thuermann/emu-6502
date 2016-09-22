@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.9 2016/09/22 19:56:03 urs Exp $
+// $Id: cpu6502.hh,v 1.10 2016/09/22 19:58:42 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -171,6 +171,7 @@ private:
     void observe_fetch(uint8_t opcode);
     void observe_begin();
     void observe_end();
+    void observe_prt_cpu_state();
 };
 
 #endif

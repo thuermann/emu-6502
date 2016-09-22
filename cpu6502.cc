@@ -1,12 +1,23 @@
 //
-// $Id: cpu6502.cc,v 1.12 2016/09/20 06:17:25 urs Exp $
+// $Id: cpu6502.cc,v 1.13 2016/09/22 19:56:03 urs Exp $
 //
 
-#include <iostream>
-#include <iomanip>
 #include <cstdint>
 
 #include "cpu6502.hh"
+
+uint8_t cpu_6502::mem_interface::load(uint16_t addr)
+{
+    uint8_t val = mem->load(addr);
+    cpu->observe_mem_access(addr, R, val);
+    return val;
+}
+
+void cpu_6502::mem_interface::store(uint16_t addr, uint8_t val)
+{
+    cpu->observe_mem_access(addr, W, val);
+    mem->store(addr, val);
+}
 
 void cpu_6502::reset()
 {
@@ -18,37 +29,18 @@ void cpu_6502::reset()
 
 void cpu_6502::run()
 {
-    unsigned long icount = 0;
-    std::cout << std::hex << std::setfill('0');
-
+    observe_init();
     while (1) {
-	opclen = 0;
-	if (verbose)
-	    std::cout << "executing " << std::setw(4) << PC << ": ";
+	observe_begin();
 	uint8_t opcode = fetch();
 	if (instruction ins = itab[opcode])
 	    (this->*ins)(opcode);
-	if (verbose) {
-	    for (int i = 0; i < 3; i++)
-		if (i < opclen)
-		    std::cout << ' ' << std::setw(2) << (int)opc[i];
-		else
-		    std::cout << "   ";
-	    std::cout << "  ["
-		      << std::setw(2) << (int)A << ' '
-		      << std::setw(2) << (int)X << ' '
-		      << std::setw(2) << (int)Y << ' '
-		      << std::setw(2) << (int)S << ' '
-		      << std::setw(2) << (int)P << ' '
-		      << std::setw(4) << (int)PC << ']'
-		      << std::endl;
-	}
-	icount++;
+	observe_end();
 	// Temporary hack to provide a way to terminate a program
 	if (opcode == 0)
 	    break;
     }
-    std::cout << std::dec << icount << " instructions executed." << std::endl;
+    observe_finish();
 }
 
 #define I(mnc) &cpu_6502::mnc
@@ -471,7 +463,9 @@ void cpu_6502::nop(uint8_t opcode)
 
 uint8_t cpu_6502::fetch()
 {
-    return opc[opclen++] = mem.load(PC++);
+    uint8_t opcode = mem.load(PC++);
+    observe_fetch(opcode);
+    return opcode;
 }
 
 void cpu_6502::push(uint8_t val)

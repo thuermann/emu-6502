@@ -1,5 +1,5 @@
 #
-# $Id: Makefile,v 1.3 2016/08/31 06:06:05 urs Exp $
+# $Id: Makefile,v 1.4 2016/09/22 19:56:03 urs Exp $
 #
 
 CXX	 = g++ -std=gnu++11
@@ -13,7 +13,7 @@ programs = emu-6502 test.bin count.bin count-down.bin arith.bin
 .PHONY: all
 all: $(programs)
 
-obj = emu-6502.o cpu6502.o
+obj = emu-6502.o cpu6502.o observer.o
 emu-6502: $(obj)
 	$(CXX) $(LDFLAGS) -o $@ $(obj)
 

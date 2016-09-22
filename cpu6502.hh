@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.8 2016/09/20 06:17:25 urs Exp $
+// $Id: cpu6502.hh,v 1.9 2016/09/22 19:56:03 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -12,7 +12,7 @@
 class cpu_6502 {
 public:
     cpu_6502() : A(0), X(0), Y(0), S(0), P(0), PC(0),
-		 verbose(false) {}
+		 mem(this), verbose(false) {}
     void attach(memory *mem) {
 	this->mem.attach(mem);
     }
@@ -43,11 +43,13 @@ private:
     // External memory (64K)
     class mem_interface {
     public:
-	void attach(memory *mem)                  { this->mem = mem; }
-	uint8_t load(uint16_t addr)               { return mem->load(addr); }
-	void    store(uint16_t addr, uint8_t val) { mem->store(addr, val); }
+	mem_interface(cpu_6502 *c) : cpu(c) {}
+	void attach(memory *mem) { this->mem = mem; }
+	uint8_t load(uint16_t addr);
+	void    store(uint16_t addr, uint8_t val);
     private:
-	memory *mem;
+	cpu_6502 *cpu;
+	memory   *mem;
     } mem;
 
     // CPU instructions
@@ -153,8 +155,22 @@ private:
 
     // Reporting CPU actions
     bool verbose;
+    unsigned long long icount;
     uint8_t opc[3];
     int opclen;
+    enum dir { R, W };
+    struct {
+	uint16_t addr;
+	uint8_t  val;
+	enum dir dir;
+    } maccess[8];
+    int mlen;
+    void observe_init();
+    void observe_finish();
+    void observe_mem_access(uint16_t addr, enum dir d, uint8_t val);
+    void observe_fetch(uint8_t opcode);
+    void observe_begin();
+    void observe_end();
 };
 
 #endif

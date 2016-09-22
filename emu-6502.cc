@@ -1,5 +1,5 @@
 //
-// $Id: emu-6502.cc,v 1.3 2016/08/31 05:34:59 urs Exp $
+// $Id: emu-6502.cc,v 1.4 2016/09/22 23:54:17 urs Exp $
 //
 
 #include <iostream>
@@ -12,14 +12,16 @@
 
 int main(int argc, char **argv)
 {
-    bool verbose = false;
+    int verbose = 0;
     uint16_t addr  = 0x4000;
     uint16_t reset = 0xfffc;
     cpu_6502 cpu;
     memory   mem;
 
     if (argc > 1 && strcmp(argv[1], "-v") == 0)
-	verbose = true;
+	verbose = 1;
+    else if (argc > 1 && strcmp(argv[1], "-V") == 0)
+	verbose = 2;
 
     int c, offset = 0;
     while ((c = std::cin.get()) != EOF)

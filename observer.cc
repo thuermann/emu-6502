@@ -1,5 +1,5 @@
 //
-// $Id: observer.cc,v 1.3 2016/09/22 20:12:26 urs Exp $
+// $Id: observer.cc,v 1.4 2016/09/22 23:54:17 urs Exp $
 //
 
 #include <iostream>
@@ -18,8 +18,11 @@ void cpu_6502::observe_init()
 
 void cpu_6502::observe_finish()
 {
-    observe_prt_cpu_state();
-    std::cout << '\n' << std::dec << icount << " instructions executed."
+    if (verbose > 0) {
+	observe_prt_cpu_state();
+	std::cout << '\n';
+    }
+    std::cout << std::dec << icount << " instructions executed."
 	      << std::endl;
 }
 
@@ -37,7 +40,7 @@ void cpu_6502::observe_fetch(uint8_t opcode)
 void cpu_6502::observe_begin()
 {
     opclen = mlen = 0;
-    if (verbose) {
+    if (verbose > 0) {
 	observe_prt_cpu_state();
 	std::cout << "\texecuting " << std::setw(4) << PC << ": ";
     }
@@ -45,7 +48,7 @@ void cpu_6502::observe_begin()
 
 void cpu_6502::observe_end()
 {
-    if (verbose) {
+    if (verbose > 0) {
 	for (int i = 0; i < 3; i++)
 	    if (i < opclen)
 		std::cout << ' ' << std::setw(2) << (int)opc[i];
@@ -54,11 +57,14 @@ void cpu_6502::observe_end()
 	std::cout << "  ";
 	disas(opc);
 	std::cout << std::endl;
-	for (int i = 0; i < mlen; i++)
-	    std::cout << "\t\t\t"
-		      << std::setw(4) << maccess[i].addr << ' '
-		      << maccess[i].dir["RW"] << ' '
-		      << std::setw(2) << (int)maccess[i].val << std::endl;
+	if (verbose > 1) {
+	    for (int i = 0; i < mlen; i++)
+		std::cout << "\t\t\t"
+			  << std::setw(4) << maccess[i].addr << ' '
+			  << maccess[i].dir["RW"] << ' '
+			  << std::setw(2) << (int)maccess[i].val
+			  << std::endl;
+	}
     }
     icount++;
 }

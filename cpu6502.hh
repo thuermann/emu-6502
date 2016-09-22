@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.10 2016/09/22 19:58:42 urs Exp $
+// $Id: cpu6502.hh,v 1.11 2016/09/22 23:54:17 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -12,14 +12,14 @@
 class cpu_6502 {
 public:
     cpu_6502() : A(0), X(0), Y(0), S(0), P(0), PC(0),
-		 mem(this), verbose(false) {}
+		 mem(this), verbose(0) {}
     void attach(memory *mem) {
 	this->mem.attach(mem);
     }
     void reset();
     void run();
 
-    void set_verbose(bool v) { verbose = v; }
+    void set_verbose(int v) { verbose = v; }
 
 private:
     // The CPU register set
@@ -154,7 +154,7 @@ private:
     static const instruction itab[256];
 
     // Reporting CPU actions
-    bool verbose;
+    int verbose;
     unsigned long long icount;
     uint8_t opc[3];
     int opclen;

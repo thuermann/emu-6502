@@ -1,5 +1,5 @@
 #
-# $Id: Makefile,v 1.6 2016/09/23 21:55:05 urs Exp $
+# $Id: Makefile,v 1.7 2016/09/23 23:03:02 urs Exp $
 #
 
 CXX	  = g++ -std=gnu++11
@@ -28,3 +28,4 @@ clean:
 
 emu-6502.o: cpu6502.hh memory.hh
 cpu6502.o:  cpu6502.hh memory.hh
+observer.o: cpu6502.hh memory.hh

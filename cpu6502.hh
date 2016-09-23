@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.12 2016/09/23 00:13:36 urs Exp $
+// $Id: cpu6502.hh,v 1.13 2016/09/23 16:52:20 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -8,6 +8,10 @@
 #include <cstdint>
 
 #include "memory.hh"
+
+#define LO(addr)     ((uint8_t)((addr) & 0xff))
+#define HI(addr)     ((uint8_t)((addr) >> 8))
+#define ADDR(lo, hi) ((uint16_t)((lo) | (hi) << 8))
 
 class cpu_6502 {
 public:

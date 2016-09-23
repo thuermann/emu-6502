@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.15 2016/09/23 01:11:12 urs Exp $
+// $Id: cpu6502.cc,v 1.16 2016/09/23 16:52:20 urs Exp $
 //
 
 #include <cstdint>
@@ -23,7 +23,7 @@ void cpu_6502::reset()
 {
     uint8_t lo = mem.load(RESET);
     uint8_t hi = mem.load(RESET + 1);
-    PC = (hi << 8) | lo;
+    PC = ADDR(lo, hi);
     run();
 }
 
@@ -422,8 +422,8 @@ void cpu_6502::jmp(uint8_t opcode)
 void cpu_6502::jsr(uint8_t opcode)
 {
     struct ea ea = get_ea(ABS);
-    push(PC - 1 >> 8);
-    push(PC - 1 & 0xff);
+    push(HI(PC - 1));
+    push(LO(PC - 1));
     PC = ea.addr;
 }
 
@@ -431,19 +431,19 @@ void cpu_6502::rts(uint8_t opcode)
 {
     uint8_t lo = pull();
     uint8_t hi = pull();
-    PC = (hi << 8) | lo;
+    PC = ADDR(lo, hi);
     PC++;
 }
 
 void cpu_6502::brk(uint8_t opcode)
 {
-    push(PC >> 8);
-    push(PC & 0xff);
+    push(HI(PC));
+    push(LO(PC));
     push(P | 0x20);
     set(I, 1);
     uint8_t lo = mem.load(IRQ);
     uint8_t hi = mem.load(IRQ + 1);
-    PC = (hi << 8) | lo;
+    PC = ADDR(lo, hi);
 }
 
 void cpu_6502::rti(uint8_t opcode)
@@ -451,7 +451,7 @@ void cpu_6502::rti(uint8_t opcode)
     P = pull() & ~0x30;
     uint8_t lo = pull();
     uint8_t hi = pull();
-    PC = (hi << 8) | lo;
+    PC = ADDR(lo, hi);
 }
 
 void cpu_6502::nop(uint8_t opcode)
@@ -492,17 +492,17 @@ struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
     case ABS:
 	lo = fetch();
 	hi = fetch();
-	addr = (hi << 8) | lo;
+	addr = ADDR(lo, hi);
 	break;
     case ABX:
 	lo = fetch();
 	hi = fetch();
-	addr = ((hi << 8) | lo) + X;
+	addr = ADDR(lo, hi) + X;
 	break;
     case ABY:
 	lo = fetch();
 	hi = fetch();
-	addr = ((hi << 8) | lo) + Y;
+	addr = ADDR(lo, hi) + Y;
 	break;
     case ZP:
 	lo = fetch();
@@ -524,25 +524,25 @@ struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
     case IND:
 	lo = fetch();
 	hi = fetch();
-	addr = (hi << 8) | lo;
+	addr = ADDR(lo, hi);
 	lo = mem.load(addr);
 	// This is a bug in the 6502.
 	addr = addr & 0xff00 | (addr + 1 & 0xff);
 	hi = mem.load(addr);
-	addr = (hi << 8) | lo;
+	addr = ADDR(lo, hi);
 	break;
     case INX:
 	addr = fetch();
 	addr += X;
 	lo = mem.load(addr++);
 	hi = mem.load(addr);
-	addr = (hi << 8) | lo;
+	addr = ADDR(lo, hi);
 	break;
     case INY:
 	addr = fetch();
 	lo = mem.load(addr++);
 	hi = mem.load(addr);
-	addr = ((hi << 8) | lo) + Y;
+	addr = ADDR(lo, hi) + Y;
 	break;
     default:
 	// unreachable, but prevent compiler warning

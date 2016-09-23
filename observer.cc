@@ -1,5 +1,5 @@
 //
-// $Id: observer.cc,v 1.6 2016/09/23 00:15:39 urs Exp $
+// $Id: observer.cc,v 1.7 2016/09/23 16:52:20 urs Exp $
 //
 
 #include <iostream>
@@ -180,8 +180,6 @@ static const struct {
     II(sed),      IA(sbc, ABY), ILL,          ILL,
     ILL,          IA(sbc, ABX), IA(inc, ABX), ILL,
 };
-
-#define ADDR(lo, hi) ((uint16_t)(hi) << 8 | (lo))
 
 static void disas(uint8_t *opc)
 {

@@ -1,14 +1,15 @@
 #
-# $Id: Makefile,v 1.4 2016/09/22 19:56:03 urs Exp $
+# $Id: Makefile,v 1.5 2016/09/23 17:33:46 urs Exp $
 #
 
-CXX	 = g++ -std=gnu++11
-CXXFLAGS = -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses
-LDFLAGS  = -ggdb
-AS65	 = xa
-RM	 = rm -f
+CXX	  = g++ -std=gnu++11
+CXXFLAGS  = -ggdb -Wall -Wextra -Wno-unused-parameter -Wno-parentheses
+LDFLAGS   = -ggdb
+AS65	  = cl65
+AS65FLAGS =
+RM	  = rm -f
 
-programs = emu-6502 test.bin count.bin count-down.bin arith.bin
+programs  = emu-6502 test.bin count.bin count-down.bin arith.bin
 
 .PHONY: all
 all: $(programs)
@@ -19,7 +20,7 @@ emu-6502: $(obj)
 
 .SUFFIXES: .bin
 .s.bin:
-	 $(AS65) -o $@ $<
+	 $(AS65) $(AS65FLAGS) -t none -o $@ $<
 
 .PHONY: clean
 clean:

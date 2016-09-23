@@ -1,5 +1,5 @@
 ;
-; "$Id: test.s,v 1.2 2016/09/23 01:11:12 urs Exp $"
+; $Id: test.s,v 1.3 2016/09/23 17:33:46 urs Exp $
 ;
 ; Some dumb test code for the 6502 emulator.
 ; It's not very clever (i.e. fast and/or small) but tests many instructions,
@@ -11,7 +11,7 @@
 ; 01ff d2
 ; 0400 ffffec46
 
-	* = $4000
+	.org $4000
 
 	ldx #$ff
 	txs

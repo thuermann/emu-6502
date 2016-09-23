@@ -1,8 +1,8 @@
 ;
-; "$Id: arith.s,v 1.6 2016/09/23 01:11:12 urs Exp $"
+; $Id: arith.s,v 1.7 2016/09/23 17:33:46 urs Exp $
 ;
 
-	* = $4000
+	.org $4000
 
 src1	= $20
 src2	= $22
@@ -17,16 +17,16 @@ prod	= $440
 pow	= $450
 tmp	= $460
 
-entry	jmp start
+entry:	jmp start
 	nop
 
-s1	.byte $4e, $61, $bc, $00,0,0,0,0,0,0,0,0,0,0,0,0
-s2	.byte $b1, $7f, $39, $05,0,0,0,0,0,0,0,0,0,0,0,0
+s1:	.byte $4e, $61, $bc, $00,0,0,0,0,0,0,0,0,0,0,0,0
+s2:	.byte $b1, $7f, $39, $05,0,0,0,0,0,0,0,0,0,0,0,0
 
-base	.byte $67,$45,$23,$01,$98,$ba,$dc,$fe,0,0,0,0,0,0,0,0
-one	.byte 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+base:	.byte $67,$45,$23,$01,$98,$ba,$dc,$fe,0,0,0,0,0,0,0,0
+one:	.byte 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
-start	ldx #$ff
+start:	ldx #$ff
 	txs
 
 	lda #16
@@ -61,7 +61,7 @@ start	ldx #$ff
 	lda #>left
 	sta dst+1
 	lda #4
-l1	pha
+l1:	pha
 	clc
 	jsr rolx
 	pla
@@ -75,7 +75,7 @@ l1	pha
 	lda #>right
 	sta dst+1
 	ldx #4
-r1	clc
+r1:	clc
 	jsr rorx
 	dex
 	bne r1
@@ -103,18 +103,18 @@ r1	clc
 
 	ldy cnt		; *dst = 1
 	dey
-c1	lda one,y
+c1:	lda one,y
 	sta (dst),y
 	dey
 	bpl c1
 
 	ldx #80
-lp1	txa
+lp1:	txa
 	pha
 
 	ldy cnt		; *src2 = *dst
 	dey
-lp2	lda (dst),y
+lp2:	lda (dst),y
 	sta (src2),y
 	dey
 	bpl lp2
@@ -131,9 +131,9 @@ lp2	lda (dst),y
 
 ; copy *src1 to *dst
 
-copyx	ldy cnt
+copyx:	ldy cnt
 	dey
-copyx1	lda (src1),y
+copyx1:	lda (src1),y
 	sta (dst),y
 	dey
 	bpl copyx1
@@ -142,9 +142,9 @@ copyx1	lda (src1),y
 ; rotate right
 ; *dst = (*src1 >> 1) | carry << (NUMBITS - 1), carry = *src1 & 1
 
-rorx	ldy cnt
+rorx:	ldy cnt
 	dey
-rorx1	lda (src1),y
+rorx1:	lda (src1),y
 	ror
 	sta (dst),y
 	dey
@@ -154,9 +154,9 @@ rorx1	lda (src1),y
 ; rotate left
 ; *dst = (*src1 << 1) | carry, carry = *src1 & (1 << NUMBITS-1)
 
-rolx	ldy #0
+rolx:	ldy #0
 	ldx cnt
-rolx1	lda (src1),y
+rolx1:	lda (src1),y
 	rol
 	sta (dst),y
 	iny
@@ -167,9 +167,9 @@ rolx1	lda (src1),y
 ; add
 ; *dst = *src1 + *src2
 
-adcx	ldy #0
+adcx:	ldy #0
 	ldx cnt
-adcx1	lda (src1),y
+adcx1:	lda (src1),y
 	adc (src2),y
 	sta (dst),y
 	iny
@@ -180,9 +180,9 @@ adcx1	lda (src1),y
 ; subtract
 ; *dst = *src1 - *src2
 
-sbcx	ldy #0
+sbcx:	ldy #0
 	ldx cnt
-sbcx1	lda (src1),y
+sbcx1:	lda (src1),y
 	sbc (src2),y
 	sta (dst),y
 	iny
@@ -193,10 +193,10 @@ sbcx1	lda (src1),y
 ; multiply
 ; *dst = *src1 * *src2
 
-mulx	ldy cnt		; *dst = 0
+mulx:	ldy cnt		; *dst = 0
 	dey
 	lda #0
-mulx0	sta (dst),y
+mulx0:	sta (dst),y
 	dey
 	bpl mulx0
 
@@ -204,7 +204,7 @@ mulx0	sta (dst),y
 	asl
 	asl
 	asl
-mulx1	pha
+mulx1:	pha
 
 	ldy cnt		; *src1 <<= 1
 	dey
@@ -213,7 +213,7 @@ mulx1	pha
 	php
 	ldy #0
 	ldx cnt
-mulxsr	lda (src1),y
+mulxsr:	lda (src1),y
 	rol
 	sta (src1),y
 	iny
@@ -223,7 +223,7 @@ mulxsr	lda (src1),y
 	ldy #0		; *dst <<= 1
 	ldx cnt
 	clc
-mulxsl	lda (dst),y
+mulxsl:	lda (dst),y
 	rol
 	sta (dst),y
 	iny
@@ -236,14 +236,15 @@ mulxsl	lda (dst),y
 	ldy #0		; *dst += *src2
 	ldx cnt
 	clc
-mulxadd	lda (src2),y
+mulxadd:
+	lda (src2),y
 	adc (dst),y
 	sta (dst),y
 	iny
 	dex
 	bne mulxadd
 
-mulx2	pla
+mulx2:	pla
 	sec
 	sbc #1
 	bne mulx1

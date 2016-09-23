@@ -1,20 +1,20 @@
 ;
-; "$Id: count-down.s,v 1.2 2016/09/23 01:11:12 urs Exp $"
+; $Id: count-down.s,v 1.3 2016/09/23 17:33:46 urs Exp $
 ;
 
-	* = $4000
+	.org $4000
 
 cnt	= 0
 
-start	ldx #3
-copy	lda count,x
+	ldx #3
+copy:	lda count,x
 	sta cnt,x
 	dex
 	bpl copy
 
 	bmi next	; N = 1
-loop	nop
-next	dec cnt
+loop:	nop
+next:	dec cnt
 	cpx cnt
 	bne loop
 	dec cnt+1
@@ -27,7 +27,7 @@ next	dec cnt
 	cpx cnt+3
 	bne loop
 
-end	.byte $ff
+end:	.byte $ff
 	brk
 
-count	.byte 0,0,1,0
+count:	.byte 0,0,1,0

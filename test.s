@@ -1,5 +1,5 @@
 ;
-; "$Id: test.s,v 1.1 2016/08/28 02:01:28 urs Exp $"
+; "$Id: test.s,v 1.2 2016/09/23 01:11:12 urs Exp $"
 ;
 ; Some dumb test code for the 6502 emulator.
 ; It's not very clever (i.e. fast and/or small) but tests many instructions,
@@ -145,6 +145,7 @@ loop3:	plp
 	tax
 	bne fail	; assert the sum is 0
 
+	.byte $ff
 	brk
 
 fail:	jmp fail

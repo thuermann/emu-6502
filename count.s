@@ -1,5 +1,5 @@
 ;
-; "$Id: count.s,v 1.1 2016/08/30 13:59:47 urs Exp $"
+; "$Id: count.s,v 1.2 2016/09/23 01:11:12 urs Exp $"
 ;
 
 	* = $4000
@@ -19,4 +19,5 @@ loop:	inc 0
 	inc 3
 	bne loop
 
+	.byte $ff
 	brk

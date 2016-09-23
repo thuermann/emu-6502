@@ -1,5 +1,5 @@
 ;
-; "$Id: count-down.s,v 1.1 2016/08/30 13:59:47 urs Exp $"
+; "$Id: count-down.s,v 1.2 2016/09/23 01:11:12 urs Exp $"
 ;
 
 	* = $4000
@@ -27,6 +27,7 @@ next	dec cnt
 	cpx cnt+3
 	bne loop
 
-end	brk
+end	.byte $ff
+	brk
 
 count	.byte 0,0,1,0

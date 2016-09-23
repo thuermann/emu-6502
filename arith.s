@@ -1,5 +1,5 @@
 ;
-; "$Id: arith.s,v 1.5 2016/09/07 22:55:04 urs Exp $"
+; "$Id: arith.s,v 1.6 2016/09/23 01:11:12 urs Exp $"
 ;
 
 	* = $4000
@@ -126,6 +126,7 @@ lp2	lda (dst),y
 	dex
 	bne lp1
 
+	.byte $ff
 	brk
 
 ; copy *src1 to *dst

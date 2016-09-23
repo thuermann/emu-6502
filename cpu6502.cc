@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.14 2016/09/22 20:11:43 urs Exp $
+// $Id: cpu6502.cc,v 1.15 2016/09/23 01:11:12 urs Exp $
 //
 
 #include <cstdint>
@@ -37,7 +37,7 @@ void cpu_6502::run()
 	    (this->*ins)(opcode);
 	observe_end();
 	// Temporary hack to provide a way to terminate a program
-	if (opcode == 0)
+	if (opcode == 0xff)
 	    break;
     }
     observe_finish();

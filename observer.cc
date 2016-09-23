@@ -1,5 +1,5 @@
 //
-// $Id: observer.cc,v 1.4 2016/09/22 23:54:17 urs Exp $
+// $Id: observer.cc,v 1.5 2016/09/23 00:13:36 urs Exp $
 //
 
 #include <iostream>
@@ -12,7 +12,7 @@ static void disas(uint8_t *opc);
 
 void cpu_6502::observe_init()
 {
-    icount = 0;
+    icount = fcount = mcount = 0;
     std::cout << std::hex << std::setfill('0');
 }
 
@@ -22,18 +22,24 @@ void cpu_6502::observe_finish()
 	observe_prt_cpu_state();
 	std::cout << '\n';
     }
-    std::cout << std::dec << icount << " instructions executed."
+    std::cout << std::dec << icount << " instructions executed, "
+	      << fcount << " opcode bytes fetched.\n"
+	      << mcount - fcount << " memory data accesses."
 	      << std::endl;
 }
 
 void cpu_6502::observe_mem_access(uint16_t addr, enum dir d, uint8_t val)
 {
+    mcount++;
+
     int i = mlen++;
     maccess[i].addr = addr, maccess[i].dir = d, maccess[i].val = val;
 }
 
 void cpu_6502::observe_fetch(uint8_t opcode)
 {
+    fcount++;
+
     opc[opclen++] = opcode;
 }
 
@@ -48,6 +54,8 @@ void cpu_6502::observe_begin()
 
 void cpu_6502::observe_end()
 {
+    icount++;
+
     if (verbose > 0) {
 	for (int i = 0; i < 3; i++)
 	    if (i < opclen)
@@ -66,7 +74,6 @@ void cpu_6502::observe_end()
 			  << std::endl;
 	}
     }
-    icount++;
 }
 
 void cpu_6502::observe_prt_cpu_state()

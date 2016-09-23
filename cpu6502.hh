@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.hh,v 1.11 2016/09/22 23:54:17 urs Exp $
+// $Id: cpu6502.hh,v 1.12 2016/09/23 00:13:36 urs Exp $
 //
 
 #ifndef CPU6502_HH
@@ -155,7 +155,7 @@ private:
 
     // Reporting CPU actions
     int verbose;
-    unsigned long long icount;
+    unsigned long long icount, fcount, mcount;
     uint8_t opc[3];
     int opclen;
     enum dir { R, W };

@@ -1,5 +1,5 @@
 ;
-; $Id: test.s,v 1.3 2016/09/23 17:33:46 urs Exp $
+; $Id: test.s,v 1.4 2016/09/23 21:54:55 urs Exp $
 ;
 ; Some dumb test code for the 6502 emulator.
 ; It's not very clever (i.e. fast and/or small) but tests many instructions,
@@ -11,9 +11,9 @@
 ; 01ff d2
 ; 0400 ffffec46
 
-	.org $4000
+	.org $fc00
 
-	ldx #$ff
+start:	ldx #$ff
 	txs
 
 ; Test whether jsr/rts works correctly:
@@ -27,7 +27,7 @@
 
 ; sum(n) = if n == 0 then 0 else n + sum(n - 1)
 sum:	tax
-	beq end
+	beq ret
 	pha
 	dex
 	txa
@@ -37,7 +37,7 @@ sum:	tax
 	clc
 	adc $0100,x
 	txs
-end:	rts
+ret:	rts
 
 ; Test adc and sbc, especially setting of C and V:
 ; Add 1..100 and subtract even numbers 2..200 from 0, then add both results.
@@ -145,7 +145,11 @@ loop3:	plp
 	tax
 	bne fail	; assert the sum is 0
 
-	.byte $ff
-	brk
+end:	.byte $ff
 
 fail:	jmp fail
+
+	.res $fffa - *
+nmivec:	.word 0
+resvec:	.word start
+irqvec:	.word 0

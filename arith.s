@@ -1,8 +1,8 @@
 ;
-; $Id: arith.s,v 1.7 2016/09/23 17:33:46 urs Exp $
+; $Id: arith.s,v 1.8 2016/09/23 21:54:55 urs Exp $
 ;
 
-	.org $4000
+	.org $fc00
 
 src1	= $20
 src2	= $22
@@ -126,8 +126,8 @@ lp2:	lda (dst),y
 	dex
 	bne lp1
 
-	.byte $ff
-	brk
+end:	.byte $ff
+
 
 ; copy *src1 to *dst
 
@@ -249,3 +249,8 @@ mulx2:	pla
 	sbc #1
 	bne mulx1
 	rts
+
+	.res $fffa - *
+nmivec:	.word 0
+resvec:	.word entry
+irqvec:	.word 0

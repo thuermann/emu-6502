@@ -1,5 +1,5 @@
 //
-// $Id: observer.cc,v 1.5 2016/09/23 00:13:36 urs Exp $
+// $Id: observer.cc,v 1.6 2016/09/23 00:15:39 urs Exp $
 //
 
 #include <iostream>
@@ -32,21 +32,24 @@ void cpu_6502::observe_mem_access(uint16_t addr, enum dir d, uint8_t val)
 {
     mcount++;
 
-    int i = mlen++;
-    maccess[i].addr = addr, maccess[i].dir = d, maccess[i].val = val;
+    if (verbose > 1) {
+	int i = mlen++;
+	maccess[i].addr = addr, maccess[i].dir = d, maccess[i].val = val;
+    }
 }
 
 void cpu_6502::observe_fetch(uint8_t opcode)
 {
     fcount++;
 
-    opc[opclen++] = opcode;
+    if (verbose > 0)
+	opc[opclen++] = opcode;
 }
 
 void cpu_6502::observe_begin()
 {
-    opclen = mlen = 0;
     if (verbose > 0) {
+	opclen = mlen = 0;
 	observe_prt_cpu_state();
 	std::cout << "\texecuting " << std::setw(4) << PC << ": ";
     }

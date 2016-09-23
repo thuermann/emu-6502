@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.17 2016/09/23 16:54:35 urs Exp $
+// $Id: cpu6502.cc,v 1.18 2016/09/23 16:55:28 urs Exp $
 //
 
 #include <cstdint>
@@ -443,6 +443,7 @@ void cpu_6502::rts(uint8_t opcode)
 
 void cpu_6502::brk(uint8_t opcode)
 {
+    PC++;
     push(HI(PC));
     push(LO(PC));
     push(P | 0x20);

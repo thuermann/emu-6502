@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.16 2016/09/23 16:52:20 urs Exp $
+// $Id: cpu6502.cc,v 1.17 2016/09/23 16:54:35 urs Exp $
 //
 
 #include <cstdint>
@@ -82,51 +82,51 @@ const cpu_6502::instruction cpu_6502::itab[256] = {
 
 void cpu_6502::sta(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    store_ea(ea, A);
+    uint8_t addrmode = (opcode >> 2) & 7;
+    store_ea(get_ea(addrmode), A);
 }
 
 void cpu_6502::lda(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    A = load_ea(ea);
+    uint8_t addrmode = (opcode >> 2) & 7;
+    A = load_ea(get_ea(addrmode));
     set_NZ(A);
 }
 
 void cpu_6502::ora(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    alu_ora(load_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    alu_ora(load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::AND(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    alu_and(load_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    alu_and(load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::eor(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    alu_eor(load_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    alu_eor(load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::adc(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    alu_adc(load_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    alu_adc(load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::sbc(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    alu_sbc(load_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    alu_sbc(load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::cmp(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    alu_cmp(A, load_ea(ea));
+    uint8_t addrmode = (opcode >> 2) & 7;
+    alu_cmp(A, load_ea(get_ea(addrmode)));
 }
 
 void cpu_6502::stx(uint8_t opcode)
@@ -260,13 +260,15 @@ void cpu_6502::dey(uint8_t opcode)
 
 void cpu_6502::inc(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
+    uint8_t addrmode = (opcode >> 2) & 7;
+    struct ea ea = get_ea(addrmode);
     store_ea(ea, alu_inc(load_ea(ea)));
 }
 
 void cpu_6502::dec(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
+    uint8_t addrmode = (opcode >> 2) & 7;
+    struct ea ea = get_ea(addrmode);
     store_ea(ea, alu_dec(load_ea(ea)));
 }
 
@@ -316,8 +318,8 @@ void cpu_6502::ror(uint8_t opcode)
 
 void cpu_6502::bit(uint8_t opcode)
 {
-    struct ea ea = get_ea((opcode >> 2) & 7);
-    uint8_t val = load_ea(ea);
+    uint8_t addrmode = (opcode >> 2) & 7;
+    uint8_t val = load_ea(get_ea(addrmode));
     P = P & ~0xc0 | val & 0xc0;
     set(Z, (A & val) == 0);
 }
@@ -419,11 +421,15 @@ void cpu_6502::jmp(uint8_t opcode)
     PC = ea.addr;
 }
 
+// The 6502 doesn't push the address of the next instruction to the stack
+// but the address - 1.  Therefore, the rts instruction has to add one
+// to the address popped off the stack.
 void cpu_6502::jsr(uint8_t opcode)
 {
     struct ea ea = get_ea(ABS);
-    push(HI(PC - 1));
-    push(LO(PC - 1));
+    PC--;
+    push(HI(PC));
+    push(LO(PC));
     PC = ea.addr;
 }
 

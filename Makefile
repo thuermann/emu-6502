@@ -1,5 +1,5 @@
 #
-# $Id: Makefile,v 1.5 2016/09/23 17:33:46 urs Exp $
+# $Id: Makefile,v 1.6 2016/09/23 21:55:05 urs Exp $
 #
 
 CXX	  = g++ -std=gnu++11
@@ -9,7 +9,7 @@ AS65	  = cl65
 AS65FLAGS =
 RM	  = rm -f
 
-programs  = emu-6502 test.bin count.bin count-down.bin arith.bin
+programs  = emu-6502 test.bin count.bin count-down.bin arith.bin demo.bin
 
 .PHONY: all
 all: $(programs)

@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.18 2016/09/23 16:55:28 urs Exp $
+// $Id: cpu6502.cc,v 1.19 2016/09/27 22:29:57 urs Exp $
 //
 
 #include <cstdint>
@@ -466,14 +466,7 @@ void cpu_6502::nop(uint8_t opcode)
     return;
 }
 
-// push, pull, and effective address calculation.
-
-uint8_t cpu_6502::fetch()
-{
-    uint8_t opcode = mem.load(PC++);
-    observe_fetch(opcode);
-    return opcode;
-}
+// push, pull, effective address calculation, and opcode fetch
 
 void cpu_6502::push(uint8_t val)
 {
@@ -532,8 +525,13 @@ struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
 	lo = fetch();
 	hi = fetch();
 	addr = ADDR(lo, hi);
+	// The following behavior is a bug in the 6502:
+	// If addr points to the last byte in a page, the CPU doesn't
+	// read addr and addr + 1, but addr and addr + 1 - 0x100, i.e.
+	// the last byte followed by the first byte in that page.
+	// I.e. the increment of addr cannot cross a page boundary,
+	// instead the low byte of addr is incremented modulo 256.
 	lo = mem.load(addr);
-	// This is a bug in the 6502.
 	addr = addr & 0xff00 | (addr + 1 & 0xff);
 	hi = mem.load(addr);
 	addr = ADDR(lo, hi);
@@ -558,6 +556,13 @@ struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
     ea.type = ea::MEM;
     ea.addr = addr;
     return ea;
+}
+
+uint8_t cpu_6502::fetch()
+{
+    uint8_t opcode = mem.load(PC++);
+    observe_fetch(opcode);
+    return opcode;
 }
 
 uint8_t cpu_6502::load_ea(struct ea ea)

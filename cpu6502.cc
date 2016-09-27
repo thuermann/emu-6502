@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.19 2016/09/27 22:29:57 urs Exp $
+// $Id: cpu6502.cc,v 1.20 2016/09/27 22:33:25 urs Exp $
 //
 
 #include <cstdint>
@@ -481,7 +481,7 @@ uint8_t cpu_6502::pull()
 struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
 {
     struct ea ea;
-    uint8_t  lo, hi;
+    uint8_t  lo, hi, zp_addr;
     uint16_t addr;
 
     switch (addrmode) {
@@ -505,21 +505,21 @@ struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
 	addr = ADDR(lo, hi) + Y;
 	break;
     case ZP:
-	lo = fetch();
-	addr = lo;
+	zp_addr = fetch();
+	addr = zp_addr;
 	break;
     case ZPX:
 	// Strange 6502 feature: the index cannot cross
 	// from zero page to stack page.
-	lo = fetch();
-	lo += X;
-	addr = lo;
+	zp_addr = fetch();
+	zp_addr += X;
+	addr = zp_addr;
 	break;
     case ZPY:
 	// Similar to ZPX, no page crossing.
-	lo = fetch();
-	lo += Y;
-	addr = lo;
+	zp_addr = fetch();
+	zp_addr += Y;
+	addr = zp_addr;
 	break;
     case IND:
 	lo = fetch();
@@ -537,16 +537,16 @@ struct cpu_6502::ea cpu_6502::get_ea(uint8_t addrmode)
 	addr = ADDR(lo, hi);
 	break;
     case INX:
-	addr = fetch();
-	addr += X;
-	lo = mem.load(addr++);
-	hi = mem.load(addr);
+	zp_addr = fetch();
+	zp_addr += X;
+	lo = mem.load(zp_addr++);
+	hi = mem.load(zp_addr);
 	addr = ADDR(lo, hi);
 	break;
     case INY:
-	addr = fetch();
-	lo = mem.load(addr++);
-	hi = mem.load(addr);
+	zp_addr = fetch();
+	lo = mem.load(zp_addr++);
+	hi = mem.load(zp_addr);
 	addr = ADDR(lo, hi) + Y;
 	break;
     default:

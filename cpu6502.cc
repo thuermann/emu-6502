@@ -1,5 +1,5 @@
 //
-// $Id: cpu6502.cc,v 1.20 2016/09/27 22:33:25 urs Exp $
+// $Id: cpu6502.cc,v 1.21 2016/09/28 00:07:58 urs Exp $
 //
 
 #include <cstdint>
@@ -230,7 +230,7 @@ void cpu_6502::tya(uint8_t opcode)
 
 void cpu_6502::txs(uint8_t opcode)
 {
-    set_NZ(S = X);
+    S = X;
 }
 
 void cpu_6502::tsx(uint8_t opcode)
